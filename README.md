@@ -13,8 +13,14 @@ $ migrat create add-user-table --all-nodes
 # show which migrations need to be run:
 $ migrat status
 
-# get up to date
-$ migrat up
+# get up to date, even if it means going back in time
+$ migrat apply
+
+# get up to date (only forward)
+$ migrat up [filename]
+
+# go back to a specific migration
+$ migrat down <filename>
 ```
 
 ### Features
@@ -47,17 +53,21 @@ module.exports = {
     // REQUIRED. The folder to store migration scripts in.
     migrationsDir: './migrations',
 
-    // OPTIONAL. Invoked at the beginning of a run, this method
-    // should return an object with any details you want passed
-    // through to all migrations. This can be database connections,
-    // logging interfaces, etc.
-    context: function(callback) { /* ... */ },
+    // REQUIRED. The folder to store cached migration scripts in.
+    // This MUST be outside of your project/scm directory.
+    cacheDir: '/var/lib/my_app',
 
     // REQUIRED. Where the current migration state specific to the
     // current machine is to be stored. This is only used to for
     // migrations created with the `--all-nodes` flag. Make sure
     // it is writable by the user executing migrat.
-    localState: '/var/lib/my_app.migrat',
+    localState: '/var/lib/my_app/.migratdb',
+
+    // OPTIONAL. Invoked at the beginning of a run, this method
+    // should return an object with any details you want passed
+    // through to all migrations. This can be database connections,
+    // logging interfaces, etc.
+    context: function(callback) { /* ... */ },
 
     // REQUIRED. Persists the current migration state. The `state`
     // argument will always be a variable-length string. Store it
@@ -112,6 +122,29 @@ module.exports = {
     afterRun: function(err, method, to, callback) { /* ... */ }
 };
 ```
+
+## Scenarios
+
+### Changing Branches or Rolling-back Code
+
+When changing branches or performing code rollbacks, there's a good
+chance some migrations will no longer exist – which makes it hard to
+call the down methods on them to get the application back to a good state.
+
+This is where migrat's `apply` method comes in. It behaves like `up`, but
+copies the migration files to a directory outside of the project directory
+(`cacheDir`) so that they can be read even after the app directory changes.
+
+On every run afterward, migrat will calculate the diff, and attempt to
+call the `down` method on any run migrations that no longer exist (only
+issuing a warning if they fail).
+
+```sh
+$ migrat apply
+```
+
+In summary: `apply` is like `up`, but it first calls `down` on any migrations that
+are no longer in the repo. **TODO:** Need to figure out safeguards for this!
 
 ## License
 
