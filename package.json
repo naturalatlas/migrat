@@ -1,0 +1,11 @@
+{
+  "name": "migrat",
+  "version": "0.0.0",
+  "description": "A generic migration tool.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "Apache License, v2.0"
+}
