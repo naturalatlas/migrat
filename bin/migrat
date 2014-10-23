@@ -57,29 +57,6 @@ if (!action) {
 	process.exit(1);
 }
 
-var options = {
-	to: argv.to,
-	dryRun: argv.dryRun,
-	json: argv.json
-};
-
-// initialize configuration
-var config;
-var configFile = argv.config || (process.cwd() + '/migrat.config.js');
-try { config = require(configFile); }
-catch (e) {
-	console.error('Unable to load config file: ' + configFile);
-	process.exit(1);
-}
-
-// resolve paths relative to config file
-if (config.localState) {
-	config.localState = path.resolve(path.dirname(configFile), config.localState);
-}
-if (config.migrationsDir) {
-	config.migrationsDir = path.resolve(path.dirname(configFile), config.migrationsDir);
-}
-
 // execute command
 if (!/^[a-z]+$/.test(action)) {
 	console.error('Unrecognized command: "' + action + '"');
@@ -91,7 +68,7 @@ catch (e) {
 	process.exit(1);
 }
 
-command(config, options, function(err) {
+command(argv, function(err) {
 	if (err) {
 		console.error(err.message || err);
 		process.exit(1);
