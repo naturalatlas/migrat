@@ -1,8 +1,17 @@
+var _ = require('lodash');
+var assert = require('chai').assert;
 var MigratReader = require('../lib/MigratReader.js');
 var MigratMigration = require('../lib/MigratMigration.js');
 
 describe('MigratReader', function() {
 	describe('.file()', function() {
+		it('should return an error if the file does not exist', function(done) {
+			MigratReader.file(__dirname + '/fixtures/1414006573678-doesnotexist.js', function(err, migration) {
+				assert.instanceOf(err, Error);
+				assert.match(err.message, /Cannot find/);
+				done();
+			});
+		});
 		it('should return an error if the migration is missing an "up" method', function(done) {
 			MigratReader.file(__dirname + '/fixtures/1414006573678-missing-up-method.js', function(err, migration) {
 				assert.instanceOf(err, Error);
@@ -17,10 +26,10 @@ describe('MigratReader', function() {
 				done();
 			});
 		});
-		it('should return an error if the migration is missing an "check" method', function(done) {
+		it('should not return an error if the migration is missing an "check" method', function(done) {
 			MigratReader.file(__dirname + '/fixtures/1414006573678-missing-check-method.js', function(err, migration) {
-				assert.instanceOf(err, Error);
-				assert.match(err.message, /missing "check"/);
+				assert.isNull(err);
+				assert.instanceOf(migration, MigratMigration);
 				done();
 			});
 		});
@@ -68,14 +77,14 @@ describe('MigratReader', function() {
 		it('should return error if any of the migrations are invalid', function(done) {
 			MigratReader.dir(__dirname + '/fixtures/invalid-migrations', function(err) {
 				assert.instanceOf(err, Error);
-				assert.match(err.message, /invalid migration/);
+				assert.match(err.message, /missing/);
 				done();
 			});
 		});
 		it('should return an error if any of the migrations have the same timestamp', function(done) {
 			MigratReader.dir(__dirname + '/fixtures/duplicate-timestamps', function(err) {
 				assert.instanceOf(err, Error);
-				assert.match(err.message, /same timestamp/);
+				assert.match(err.message, /timestamp/);
 				done();
 			});
 		});
@@ -83,10 +92,14 @@ describe('MigratReader', function() {
 			MigratReader.dir(__dirname + '/fixtures/valid', function(err, migrations) {
 				assert.isNull(err);
 				assert.isArray(migrations);
-				assert.lengthOf(migrations, 2);
-				migrations.forEach(function(migration) {
-					assert.instanceOf(migration, MigratMigration);
-				});
+
+				var filenames = _.pluck(migrations, 'filename');
+				assert.include(filenames, '1414006573623-first.js');
+				assert.include(filenames, '1414006573678-second.js');
+				assert.include(filenames, '1414006573679-third.all.js');
+				assert.include(filenames, '1414006573700-fourth.js');
+				assert.lengthOf(migrations, 4);
+
 				done();
 			});
 		});
