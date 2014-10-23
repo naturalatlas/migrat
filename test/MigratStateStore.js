@@ -13,6 +13,16 @@ var randomTempStateFile = function(state) {
 
 describe('MigratStateStore', function() {
 	describe('.local.get()', function() {
+		it('should not error if state file doesn\'t exist yet', function(done) {
+			var project = new MigratProject({localState: './does/not/exist.json'});
+			var store = new MigratStateStore(project);
+			store.local.get(function(err, state) {
+				assert.isNull(err);
+				assert.instanceOf(state, MigratState);
+				assert.equal(JSON.stringify(state.state), '{}');
+				done();
+			});
+		});
 		it('should return proper MigratState object', function(done) {
 			var stateFile = randomTempStateFile({'1414046792583-test.all.js': 1414046792583});
 			var project = new MigratProject({localState: stateFile});

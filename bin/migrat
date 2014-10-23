@@ -1,20 +1,86 @@
 #!/usr/bin/env node
+var yargs = require('yargs');
+var chalk = require('chalk');
+var path = require('path');
+var pkg = require('../package.json');
 
-// initialize configuration
-var configFile = process.cwd() + '/migrat.config.js';
-var config = require(config);
+var argv = require('yargs')
+	.usage('Usage: $0 <command> [options]')
+	.version(pkg.version+'\n', 'version', 'Display migrat version number')
+	.alias('c', 'config')
+    .describe('c', 'Specify config file path')
+	.alias('h', 'help')
+    .describe('help', 'Display usage information')
+	.alias('t', 'to')
+    .describe('t', 'Specify migration filename to migrate to')
+    .alias('j', 'json')
+    .describe('j', 'Output as JSON (only applies to --dry-run)')
+    .alias('s', 'silent')
+    .describe('s', 'Disable all output')
+    .describe('dry-run', 'Do not execute any migrations, just display the migration plan')
+	.parse(process.argv);
+
+function displayHelp() {
+	yargs.showHelp();
+	console.log('Examples:');
+	console.log('  $ migrat status');
+	console.log('  $ migrat up');
+	console.log('  $ migrat down --to <filename>');
+	console.log('  $ migrat create <name>');
+	console.log('');
+	console.log('Commands:');
+	console.log('  "' + chalk.bold('up') + '"      Executes migrations that haven\'t run yet in a oldest-to-newest order. If no');
+	console.log('            --to argument is given, it will attempt to migrate to the newest migration. If');
+	console.log('            on is provided, it will run up to (and include) the specified migration.');
+	console.log('');
+	console.log('              $ migrat up');
+	console.log('              $ migrat up --dry-run');
+	console.log('              $ migrat up --to <filename>');
+	console.log('');
+	console.log('  "' + chalk.bold('down') + '"    Reverts migrations that have run in a newest-to-oldest order. The --to argument');
+	console.log('            required. It will call the "down" method down to (but not including) --to.');
+	console.log('');
+	console.log('              $ migrat up --to <filename> --dry-run');
+	console.log('              $ migrat up --to <filename>');
+	console.log('');
+}
+
+if (argv.help) {
+	displayHelp();
+	process.exit(0);
+}
+
+// parse options
+var command, action = argv._[2];
+if (!action) {
+	displayHelp();
+	process.exit(1);
+}
+
 var options = {
-	to: null,
-	dryRun: true
+	to: argv.to,
+	dryRun: argv.dryRun,
+	json: argv.json
 };
 
+// initialize configuration
+var configFile = argv.config || (process.cwd() + '/migrat.config.js');
+var config = require(configFile);
+
+// resolve paths relative to config file
+if (config.localState) {
+	config.localState = path.resolve(path.dirname(configFile), config.localState);
+}
+if (config.migrationsDir) {
+	config.migrationsDir = path.resolve(path.dirname(configFile), config.migrationsDir);
+}
+
 // execute command
-var command, action = 'up';
-if (/^[a-z]+$/.test(action) {
+if (!/^[a-z]+$/.test(action)) {
 	console.error('Unrecognized command: "' + action + '"');
 	process.exit(1);
 }
-try { require('../lib/Commands/' + action + '.js'); }
+try { command = require('../lib/Commands/' + action + '.js'); }
 catch (e) {
 	console.error('Unrecognized command: "' + action + '"');
 	process.exit(1);
