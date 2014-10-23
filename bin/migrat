@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+
+// initialize configuration
+var configFile = process.cwd() + '/migrat.config.js';
+var config = require(config);
+var options = {
+	to: null,
+	dryRun: true
+};
+
+// execute command
+var command, action = 'up';
+if (/^[a-z]+$/.test(action) {
+	console.error('Unrecognized command: "' + action + '"');
+	process.exit(1);
+}
+try { require('../lib/Commands/' + action + '.js'); }
+catch (e) {
+	console.error('Unrecognized command: "' + action + '"');
+	process.exit(1);
+}
+
+command(config, options, function(err) {
+	if (err) {
+		console.error(err.message || err);
+		process.exit(1);
+	} else {
+		process.exit(0);
+	}
+});

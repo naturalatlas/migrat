@@ -94,8 +94,8 @@ module.exports = {
     lock: function(callback) { /* ... */ },
 
     // OPTIONAL. The number of seconds to give up after if
-    // a lock cannot be obtained. This is only applicable
-    // if the `lock` function is implemented.
+    // a lock cannot be obtained or released. This is only
+    // applicable if the `lock` function is implemented.
     lockTimeout: 0,
 
     // OPTIONAL. (unless `lock` is implemented). Implement this to
@@ -108,24 +108,24 @@ module.exports = {
     rollbackOnFail: true,
 
     // OPTIONAL. Callback executed before each migration.
-    beforeEach: function(filename, method, callback) { /* ... */ },
+    beforeEach: function(runlist_item, callback) { /* ... */ },
 
     // OPTIONAL. Callback executed after each migration.
-    afterEach: function(err, filename, method, callback) { /* ... */ },
+    afterEach: function(err, runlist_item, callback) { /* ... */ },
 
     // OPTIONAL. Callback executed right before all
     // queued migrations are executed.
-    beforeRun: function(method, to, callback) { /* ... */ },
+    beforeRun: function(runlist, callback) { /* ... */ },
 
     // OPTIONAL. Callback executed right before all
     // queued migrations are executed.
-    afterRun: function(err, method, to, callback) { /* ... */ }
+    afterRun: function(err, runlist, callback) { /* ... */ }
 };
 ```
 
 ## Scenarios
 
-### Changing Branches or Rolling-back Code
+### Changing Branches / Rolling-back Code
 
 When changing branches or performing code rollbacks, there's a good
 chance some migrations will no longer exist – which makes it hard to
