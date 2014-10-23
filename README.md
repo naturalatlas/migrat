@@ -93,7 +93,7 @@ module.exports = {
     // either wait for a lock to become available, or fail.
     lock: function(callback) { /* ... */ },
 
-    // OPTIONAL. The number of seconds to give up after if
+    // OPTIONAL. The number of milliseconds to give up after if
     // a lock cannot be obtained or released. This is only
     // applicable if the `lock` function is implemented.
     lockTimeout: 0,

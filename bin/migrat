@@ -64,8 +64,13 @@ var options = {
 };
 
 // initialize configuration
+var config;
 var configFile = argv.config || (process.cwd() + '/migrat.config.js');
-var config = require(configFile);
+try { config = require(configFile); }
+catch (e) {
+	console.error('Unable to load config file: ' + configFile);
+	process.exit(1);
+}
 
 // resolve paths relative to config file
 if (config.localState) {
