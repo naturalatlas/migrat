@@ -6,6 +6,7 @@ var MigratRunList = require('../lib/MigratRunList.js');
 var MigratMigration = require('../lib/MigratMigration.js');
 var MockMigration = require('./mocks/MockMigration.js');
 var options = {silent: true};
+var writer = function(item, callback) { callback(); };
 
 describe('MigratExecutor', function() {
 	it('should not error if any of the hooks are not defined', function(done) {
@@ -15,10 +16,31 @@ describe('MigratExecutor', function() {
 		var migration = MockMigration('/1414050095205-mockfile.js');
 		runlist.push('up', migration);
 
-		MigratExecutor(project, runlist, options, function(err) {
+		MigratExecutor(project, runlist, options, writer, function(err) {
 			assert.isUndefined(err);
 			done();
 		});
+	});
+	it('should invoke the "writer" argument with each runlist item', function(done) {
+		var executedWriter = false;
+		var project = new MigratProject({
+			afterEach: function(err, item, callback) {
+				assert.isTrue(executedWriter);
+				done();
+			}
+		});
+		var runlist = new MigratRunList();
+		var migration = MockMigration('/1414050095205-mockfile.js');
+		runlist.push('up', migration);
+
+		var writer = function(item, callback) {
+			executedWriter = true;
+			assert.equal(item.method, 'up');
+			assert.instanceOf(item.migration, MigratMigration);
+			callback();
+		}
+
+		MigratExecutor(project, runlist, options, writer, function(err) { });
 	});
 	it('should not execute any migrations marked as "skip"', function(done) {
 		var executedHook = false;
@@ -30,7 +52,7 @@ describe('MigratExecutor', function() {
 		migration.methods.check = function(context, callback) { throw new Error('Migration "check" executed'); };
 		runlist.push('skip', migration);
 
-		MigratExecutor(project, runlist, options, function(err) {
+		MigratExecutor(project, runlist, options, writer, function(err) {
 			assert.isUndefined(err);
 			done();
 		});
@@ -46,7 +68,7 @@ describe('MigratExecutor', function() {
 		migration.methods.check = function(context, callback) { executedCheck = true; callback(); };
 		runlist.push('up', migration);
 
-		MigratExecutor(project, runlist, options, function(err) {
+		MigratExecutor(project, runlist, options, writer, function(err) {
 			assert.isUndefined(err);
 			assert.isTrue(executedUp, 'Executed "up"');
 			assert.isTrue(executedCheck, 'Executed "check"');
@@ -63,7 +85,7 @@ describe('MigratExecutor', function() {
 		migration.methods.up = function(context, callback) { throw new Error('Migration "up" executed'); };
 		runlist.push('down', migration);
 
-		MigratExecutor(project, runlist, options, function(err) {
+		MigratExecutor(project, runlist, options, writer, function(err) {
 			assert.isUndefined(err);
 			assert.isTrue(executedDown, 'Executed "up"');
 			done();
@@ -82,7 +104,7 @@ describe('MigratExecutor', function() {
 		runlist.push('up', migration1);
 		runlist.push('up', migration2);
 
-		MigratExecutor(project, runlist, options, function(err) {
+		MigratExecutor(project, runlist, options, writer, function(err) {
 			assert.instanceOf(err, Error);
 			assert.equal(err.message, 'Migration1 up failed');
 			done();
@@ -102,7 +124,7 @@ describe('MigratExecutor', function() {
 		runlist.push('up', migration1);
 		runlist.push('up', migration2);
 
-		MigratExecutor(project, runlist, options, function(err) {
+		MigratExecutor(project, runlist, options, writer, function(err) {
 			assert.instanceOf(err, Error);
 			assert.equal(err.message, 'Migration1 check failed');
 			done();
@@ -136,7 +158,7 @@ describe('MigratExecutor', function() {
 		runlist.push('up', migration);
 		runlist.push('up', migration2);
 
-		MigratExecutor(project, runlist, options, function(err) {
+		MigratExecutor(project, runlist, options, writer, function(err) {
 			assert.equal(contextExecutions, 1);
 			done();
 		});
@@ -160,7 +182,7 @@ describe('MigratExecutor', function() {
 		};
 		runlist.push('up', migration);
 
-		MigratExecutor(project, runlist, options, function(err) {
+		MigratExecutor(project, runlist, options, writer, function(err) {
 			assert.isTrue(executedUp);
 			assert.isUndefined(err);
 			done();
@@ -187,7 +209,7 @@ describe('MigratExecutor', function() {
 		};
 		runlist.push('up', migration);
 
-		MigratExecutor(project, runlist, options, function(err) {
+		MigratExecutor(project, runlist, options, writer, function(err) {
 			assert.isUndefined(err);
 			assert.isTrue(executedUp);
 			done();
@@ -216,7 +238,7 @@ describe('MigratExecutor', function() {
 		};
 		runlist.push('up', migration);
 
-		MigratExecutor(project, runlist, options, function(err) {
+		MigratExecutor(project, runlist, options, writer, function(err) {
 			assert.isUndefined(err);
 			assert.isTrue(executedHook);
 			done();
@@ -233,7 +255,7 @@ describe('MigratExecutor', function() {
 			}
 		});
 		var runlist = new MigratRunList();
-		MigratExecutor(project, runlist, options, function(err) {
+		MigratExecutor(project, runlist, options, writer, function(err) {
 			assert.isTrue(executedHook);
 			assert.isUndefined(err);
 			done();

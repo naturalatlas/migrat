@@ -62,5 +62,14 @@ describe('CLI', function() {
 				done();
 			});
 		});
+		it('should write state immediately after each successful migration', function(done) {
+			// the majority of this test happens in the project config
+			var projectDir = path.resolve(__dirname, './fixtures/write-states-project');
+			var configFile = projectDir + '/migrat.config.js';
+			exec(bin + ' up -c ' + configFile, function(err, stdout, stderr) {
+				assert.isNull(err);
+				done();
+			});
+		});
 	});
 });

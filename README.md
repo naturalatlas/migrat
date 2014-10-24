@@ -1,20 +1,31 @@
 # Migrat
 
-*Migrat is a generic Node.js migration tool.* Use it to migrate data in PostgreSQL, MySQL, Cassandra, etc or even regenerate local caches. It's designed for multi-node environments.
+*Migrat is a generic Node.js migration tool designed for diverse stacks and processes.* It is not tied any particular database engine.
 
-It's not as simple to set up as others like [node-migrate](https://www.npmjs.org/package/migrate), but it's designed to be much more robust – capable of handling very diverse stacks and processes.
+Migrat supports multi-node environments by differentiating migrations that should run on one node (to update a global database, for instance) and migrations that should run on all nodes (like updating a per-node cache).
+
+```sh
+$ npm install migrat -g
+```
+
+### Features
+
+- Migrations can be set to set to run once globally, or once per server.
+- Supports global locking during migration runs, to prevent multiple servers attempting perform global migrations at the same time.
+- Pass context through to each migration. This can be a logging interface, a set of database connections, ... it's up to you.
+
+### Usage Examples
 
 ```sh
 $ migrat create add-user-table
 # creates migrations/1413963352671-add-user-table.js
 $ migrat create add-user-table --all-nodes
 # creates migrations/1413963352671-add-user-table.all.js
+```
 
-# show which migrations need to be run:
+```sh
+# show which migrations need to be run
 $ migrat status
-
-# get up to date, even if it means going back in time
-$ migrat apply
 
 # get up to date (only forward)
 $ migrat up [filename]
@@ -23,13 +34,9 @@ $ migrat up [filename]
 $ migrat down <filename>
 ```
 
-### Features
+## Documentation
 
-- Reads [NIST] time when creating migrations. Clocks aren't always in sync, especially if working in a VM.
-- Supports global locking during migration runs, to prevent multiple servers attempting perform global migrations at the same time.
-- Migrations can be set to set to run once globally, or once per server.
-
-## Migration Files
+### Migration Files
 
 Migration files are pretty standard:
 
@@ -41,10 +48,10 @@ module.exports.up = function(context, callback) { /* ... */ };
 module.exports.down = function(context, callback) { /* ... */ };
 
 // (optional) verify the change took place
-module.exports.verify = function(context, callback) { /* ... */ };
+module.exports.check = function(context, callback) { /* ... */ };
 ```
 
-## Configuration
+### Project Configuration
 
 Migrat will look for for a `migrat.config.js` in your project directory, unless overriden by `--config`:
 
@@ -103,11 +110,6 @@ module.exports = {
     // release any global lock acquired by the `lock` function.
     unlock: function(callback) { /* ... */ },
 
-    // OPTIONAL. Whether or not to attempt to roll back to the
-    // state that existed at the beginning of the run if a migration
-    // fails. Note: this only applies to "up" operations (default: true)
-    rollbackOnFail: true,
-
     // OPTIONAL. Callback executed before each migration.
     beforeEach: function(runlist_item, callback) { /* ... */ },
 
@@ -123,29 +125,6 @@ module.exports = {
     afterRun: function(err, runlist, callback) { /* ... */ }
 };
 ```
-
-## Scenarios
-
-### Changing Branches / Rolling-back Code
-
-When changing branches or performing code rollbacks, there's a good
-chance some migrations will no longer exist – which makes it hard to
-call the down methods on them to get the application back to a good state.
-
-This is where migrat's `apply` method comes in. It behaves like `up`, but
-copies the migration files to a directory outside of the project directory
-(`cacheDir`) so that they can be read even after the app directory changes.
-
-On every run afterward, migrat will calculate the diff, and attempt to
-call the `down` method on any run migrations that no longer exist (only
-issuing a warning if they fail).
-
-```sh
-$ migrat apply
-```
-
-In summary: `apply` is like `up`, but it first calls `down` on any migrations that
-are no longer in the repo. **TODO:** Need to figure out safeguards for this!
 
 ## License
 
