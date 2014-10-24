@@ -81,11 +81,12 @@ module.exports = {
     // OPTIONAL. Provide a function that returns a string to use
     // as the source for a new migration file. The `details`
     // argument will be an object containing:
+    //   * "user"      The current user.
     //   * "filename"  The name of migration file.
-    //   * "time"      The Date object used to put the timestamp
+    //   * "timestamp" The Date object used to put the timestamp
     //                 at the beginning of the migration filename.
-    migrationTemplate: function(details) {
-        fs.readFileSync('path/to/template.js', 'utf8')
+    migrationTemplate: function(details, callback) {
+        fs.readFileSync('path/to/template.js', 'utf8', callback);
     },
 
     // OPTIONAL. Invoked at the beginning of a migration

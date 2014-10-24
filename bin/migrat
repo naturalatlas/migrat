@@ -30,9 +30,13 @@ function displayHelp() {
 	console.log('  $ migrat create <name>');
 	console.log('');
 	console.log('Commands:');
-	console.log('  "' + chalk.bold('init') + '"    Creates a new migrat project in the current directory');
+	console.log('  "' + chalk.bold('init') + '"    Creates a new migrat project in the current directory.');
 	console.log('');
 	console.log('              $ migrat init');
+	console.log('');
+	console.log('  "' + chalk.bold('create') + '"  Creates a new migration file.');
+	console.log('');
+	console.log('              $ migrat create <name>');
 	console.log('');
 	console.log('  "' + chalk.bold('up') + '"      Executes migrations that haven\'t run yet in a oldest-to-newest order. If no');
 	console.log('            --to argument is given, it will attempt to migrate to the newest migration. If');
