@@ -27,6 +27,16 @@ describe('CLI', function() {
 		});
 	});
 	describe('up, down commands', function() {
+		it('should call "initialize" first, and "terminate" at end', function(done) {
+			var projectDir = path.resolve(__dirname, './fixtures/initialize-project');
+			var configFile = projectDir + '/migrat.config.js';
+			exec(bin + ' up -c ' + configFile, function(err, stdout, stderr) {
+				assert.isNull(err);
+				assert.match(stdout, /called:initialize/);
+				assert.match(stdout, /called:terminate/);
+				done();
+			});
+		});
 		it('should resolve "migrationsDir" relative to config file', function(done) {
 			var projectDir = path.resolve(__dirname, './fixtures/valid-project');
 			var configFile = projectDir + '/migrat.config.js';

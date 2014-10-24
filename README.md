@@ -110,6 +110,16 @@ module.exports = {
     // release any global lock acquired by the `lock` function.
     unlock: function(callback) { /* ... */ },
 
+    // OPTIONAL. Invoked at the very beginning of a run before any
+    // locks are acquired or state is read. Use this to establish any
+    // connections needed by `fetchState`, `storeState`, `lock`,
+    // `unlock`, and `context`.
+    initialize: function(callback) { /* ... */ },
+
+    // OPTIONAL. Callback executed right before all
+    // queued migrations are executed.
+    beforeRun: function(runlist, callback) { /* ... */ },
+
     // OPTIONAL. Callback executed before each migration.
     beforeEach: function(runlist_item, callback) { /* ... */ },
 
@@ -118,11 +128,12 @@ module.exports = {
 
     // OPTIONAL. Callback executed right before all
     // queued migrations are executed.
-    beforeRun: function(runlist, callback) { /* ... */ },
-
-    // OPTIONAL. Callback executed right before all
-    // queued migrations are executed.
     afterRun: function(err, runlist, callback) { /* ... */ }
+
+    // OPTIONAL. Invoked at the very tail end of a run once locks
+    // are released and state has been stored. Use this to tear down
+    // any connections established in `initialize`.
+    terminate: function(callback) { /* ... */ }
 };
 ```
 
