@@ -1,8 +1,6 @@
 # Migrat
 
-*Migrat is a generic Node.js migration tool designed for diverse stacks and processes.* It is not tied any particular database engine.
-
-Migrat supports multi-node environments by differentiating migrations that should run on one node (to update a global database, for instance) and migrations that should run on all nodes (like updating a per-node cache).
+*Migrat is a generic Node.js migration tool designed for diverse stacks and processes.* It is not tied any particular database engine and supports multi-node environments by differentiating migrations that should run on one node (to update a global database, for instance) and migrations that should run on all nodes (like updating a per-node cache).
 
 ```sh
 $ npm install migrat -g
@@ -13,12 +11,14 @@ $ npm install migrat -g
 - Migrations can be set to set to run once globally, or once per server.
 - Supports global locking during migration runs, to prevent multiple servers attempting perform global migrations at the same time.
 - Pass context through to each migration. This can be a logging interface, a set of database connections, ... it's up to you.
+- Custom hooks throughout the migration process.
 
 ### Usage Examples
 
 ```sh
 $ migrat create add-user-table
 # creates migrations/1413963352671-add-user-table.js
+
 $ migrat create add-user-table --all-nodes
 # creates migrations/1413963352671-add-user-table.all.js
 ```
@@ -53,37 +53,40 @@ module.exports.check = function(context, callback) { /* ... */ };
 
 ### Project Configuration
 
-Migrat will look for for a `migrat.config.js` in your project directory, unless overriden by `--config`:
+Migrat will look for for a `migrat.config.js` in your project directory, unless overriden by `--config, -c`:
 
 ```js
 module.exports = {
     // REQUIRED. The folder to store migration scripts in.
     migrationsDir: './migrations',
 
-    // REQUIRED. The folder to store cached migration scripts in.
-    // This MUST be outside of your project/scm directory.
-    cacheDir: '/var/lib/my_app',
-
     // REQUIRED. Where the current migration state specific to the
     // current machine is to be stored. This is only used to for
     // migrations created with the `--all-nodes` flag. Make sure
-    // it is writable by the user executing migrat.
+    // it is writable by the user executing migrat and isn't wiped
+    // out between deploys.
     localState: '/var/lib/my_app/.migratdb',
 
     // OPTIONAL. Invoked at the beginning of a run, this method
     // should return an object with any details you want passed
     // through to all migrations. This can be database connections,
     // logging interfaces, etc.
-    context: function(callback) { /* ... */ },
+    context: function(callback) {
+        callback(null, {});
+    },
 
     // REQUIRED. Persists the current migration state. The `state`
     // argument will always be a variable-length string. Store it
     // to redis, disk, database, ... whatever suits you.
-    storeState: function(state, callback) { /* ... */ },
+    storeState: function(state, callback) {
+        callback();
+    },
 
     // REQUIRED. This method is responsible for fetching the
     // current migration state, persisted by `storeState`.
-    fetchState: function(callback) { /* ... */ },
+    fetchState: function(callback) {
+        callback(null, state);
+    },
 
     // OPTIONAL. Provide a function that returns a string to use
     // as the source for a new migration file. The `details`
@@ -99,43 +102,75 @@ module.exports = {
     // OPTIONAL. Invoked at the beginning of a migration
     // run. Use this to establish a global lock. You can
     // either wait for a lock to become available, or fail.
-    lock: function(callback) { /* ... */ },
+    lock: function(callback) {
+        callback();
+    },
+
+    // OPTIONAL (unless `lock` is implemented). Implement this to
+    // release any global lock acquired by the `lock` function.
+    unlock: function(callback) {
+        callback();
+    },
 
     // OPTIONAL. The number of milliseconds to give up after if
     // a lock cannot be obtained or released. This is only
     // applicable if the `lock` function is implemented.
     lockTimeout: 0,
 
-    // OPTIONAL. (unless `lock` is implemented). Implement this to
-    // release any global lock acquired by the `lock` function.
-    unlock: function(callback) { /* ... */ },
-
-    // OPTIONAL. Invoked at the very beginning of a run before any
-    // locks are acquired or state is read. Use this to establish any
-    // connections needed by `fetchState`, `storeState`, `lock`,
-    // `unlock`, and `context`.
-    initialize: function(callback) { /* ... */ },
+    // OPTIONAL. Invoked at the very beginning of a run before
+    // any locks are acquired or state is read. Use this to
+    // establish any connections needed by `fetchState`,
+    // `storeState`, `lock`, `unlock`, and `context`.
+    initialize: function(callback) {
+        callback();
+    },
 
     // OPTIONAL. Callback executed right before all
     // queued migrations are executed.
-    beforeRun: function(runlist, callback) { /* ... */ },
+    beforeRun: function(runlist, callback) {
+        callback();
+    },
 
     // OPTIONAL. Callback executed before each migration.
-    beforeEach: function(runlist_item, callback) { /* ... */ },
+    beforeEach: function(runlist_item, callback) {
+        callback();
+    },
 
     // OPTIONAL. Callback executed after each migration.
-    afterEach: function(err, runlist_item, callback) { /* ... */ },
+    afterEach: function(err, runlist_item, callback) {
+        callback();
+    },
 
     // OPTIONAL. Callback executed right before all
     // queued migrations are executed.
-    afterRun: function(err, runlist, callback) { /* ... */ }
+    afterRun: function(err, runlist, callback) {
+        callback();
+    },
 
     // OPTIONAL. Invoked at the very tail end of a run once locks
-    // are released and state has been stored. Use this to tear down
-    // any connections established in `initialize`.
-    terminate: function(callback) { /* ... */ }
+    // are released and state has been stored. Use this to tear
+    // down any connections established in `initialize`.
+    terminate: function(callback) {
+        callback();
+    }
 };
 ```
+
+## Contributing
+
+Before submitting pull requests, please update the [tests](test) and make sure they all pass.
+
+```sh
+$ npm test
+```
+
+#### Roadmap
+
+- **Plugin System** to make using migrat less verbose and more featureful. Language adapters would simply need to translate a migration file to an object with "up", "down", and "check" methods.
+    - `migrat-mysql`, `migrat-postgres` – Write migrations in pure SQL.
+    - `migrat-hipchat` – Send live migration status to a [HipChat](https://www.hipchat.com/) room.
+    - `migrat-slack` – Send live migration status to a [Slack](https://slack.com/) channel.
+    - `migrat-datadog` – Send live migration status to a [Datadog](https://www.datadoghq.com) dashboard.
 
 ## License
 
