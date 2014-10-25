@@ -16,13 +16,13 @@ $ npm install -g migrat
 
 ### Plugins
 
-Migrat works great on it's own, but it's even better with plugins to reduce boilerplate. Plugin list (the ones without links haven't been developed yet):
+Migrat works great on its own, but it's even better with plugins to reduce boilerplate. Plugin list (the ones without links haven't been developed yet – [pull requests](#contributing) welcome):
 
-    - [`migrat-postgres`](https://github.com/naturalatlas/migrat-postgres) – Write migrations in pure SQL + have locking and migration state storage taken care of via PostgreSQL.
-    - `migrat-mysql` – Write migrations in pure SQL + have locking and migration state storage taken care of via MySQL. 
-    - `migrat-hipchat` – Send live migration status to a [HipChat](https://www.hipchat.com/) room.
-    - `migrat-slack` – Send live migration status to a [Slack](https://slack.com/) channel.
-    - `migrat-datadog` – Send migration results to a [Datadog](https://www.datadoghq.com) dashboard.
+ - [`migrat-postgres`](https://github.com/naturalatlas/migrat-postgres) – Locks, state storage, and migrations in pure SQL.
+ - `migrat-mysql` – Locks, state storage, and migrations in pure SQL.
+ - `migrat-hipchat` – Send live migration status to a [HipChat](https://www.hipchat.com/) room.
+ - `migrat-slack` – Send live migration status to a [Slack](https://slack.com/) channel.
+ - `migrat-datadog` – Send migration results to a [Datadog](https://www.datadoghq.com) dashboard.
 
 ### Usage Examples
 
