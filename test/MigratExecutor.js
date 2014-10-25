@@ -87,7 +87,7 @@ describe('MigratExecutor', function() {
 
 		MigratExecutor(project, runlist, options, writer, function(err) {
 			assert.isUndefined(err);
-			assert.isTrue(executedDown, 'Executed "up"');
+			assert.isTrue(executedDown, 'Executed "down"');
 			done();
 		});
 	});

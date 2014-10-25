@@ -1,17 +1,28 @@
 # Migrat
 
-*Migrat is a generic Node.js migration tool designed for diverse stacks and processes.* It is not tied any particular database engine and supports multi-node environments by differentiating migrations that should run on one node (to update a global database, for instance) and migrations that should run on all nodes (like updating a per-node cache).
+*Migrat is a pluggable Node.js migration tool designed for diverse stacks and processes.* It is not tied any particular database engine and supports multi-node environments by differentiating migrations that should run on one node (to update a global database, for instance) and migrations that should run on all nodes (like updating a per-node cache).
 
 ```sh
-$ npm install migrat -g
+$ npm install -g migrat
 ```
 
 ### Features
 
 - Migrations can be set to set to run once globally, or once per server.
-- Supports global locking during migration runs, to prevent multiple servers attempting perform global migrations at the same time.
+- Supports global locking during migration runs, to prevent multiple servers attempting to perform global migrations at the same time.
 - Pass context through to each migration. This can be a logging interface, a set of database connections, ... it's up to you.
 - Custom hooks throughout the migration process.
+- Plugin-friendly (see below)
+
+### Plugins
+
+Migrat works great on it's own, but it's even better with plugins to reduce boilerplate. Plugin list (the ones without links haven't been developed yet):
+
+    - [`migrat-postgres`](https://github.com/naturalatlas/migrat-postgres) – Write migrations in pure SQL + have locking and migration state storage taken care of via PostgreSQL.
+    - `migrat-mysql` – Write migrations in pure SQL + have locking and migration state storage taken care of via MySQL. 
+    - `migrat-hipchat` – Send live migration status to a [HipChat](https://www.hipchat.com/) room.
+    - `migrat-slack` – Send live migration status to a [Slack](https://slack.com/) channel.
+    - `migrat-datadog` – Send migration results to a [Datadog](https://www.datadoghq.com) dashboard.
 
 ### Usage Examples
 
@@ -53,7 +64,7 @@ module.exports.check = function(context, callback) { /* ... */ };
 
 ### Project Configuration
 
-Migrat will look for for a `migrat.config.js` in your project directory, unless overriden by `--config, -c`:
+Migrat will look for for a `migrat.config.js` in your project directory, unless overriden by `--config`:
 
 ```js
 module.exports = {
@@ -163,14 +174,6 @@ Before submitting pull requests, please update the [tests](test) and make sure t
 ```sh
 $ npm test
 ```
-
-#### Roadmap
-
-- **Plugin System** to make using migrat less verbose and more featureful. Language adapters would simply need to translate a migration file to an object with "up", "down", and "check" methods.
-    - `migrat-mysql`, `migrat-postgres` – Write migrations in pure SQL.
-    - `migrat-hipchat` – Send live migration status to a [HipChat](https://www.hipchat.com/) room.
-    - `migrat-slack` – Send live migration status to a [Slack](https://slack.com/) channel.
-    - `migrat-datadog` – Send live migration status to a [Datadog](https://www.datadoghq.com) dashboard.
 
 ## License
 
