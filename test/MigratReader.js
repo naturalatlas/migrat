@@ -98,6 +98,37 @@ describe('MigratReader', function() {
 				done();
 			});
 		});
+		it('should handle non-js extensions properly via plugins', function(done) {
+			var up = function() {};
+			var down = function() {};
+			var check = function() {};
+
+			var file = __dirname + '/fixtures/1414006573678-doesntexistat.all.sql';
+			var plugins = new MigratPluginSystem([
+				function(migrat) {
+					migrat.registerLoader('*.sql', function(file, callback) {
+						return callback(null, {
+							up: up,
+							down: down,
+							check: check
+						});
+					});
+				}
+			]);
+			MigratReader.file(file, plugins, function(err, migration) {
+				assert.isNull(err);
+				assert.instanceOf(migration, MigratMigration);
+				assert.equal(migration.type, 'all');
+				assert.equal(migration.name, 'doesntexistat');
+				assert.equal(migration.file, file);
+				assert.equal(migration.timestamp, 1414006573678);
+				assert.equal(migration.filename, '1414006573678-doesntexistat.all.sql');
+				assert.equal(migration.methods.up, up);
+				assert.equal(migration.methods.down, down);
+				assert.equal(migration.methods.check, check);
+				done();
+			});
+		});
 	});
 	describe('.dir()', function() {
 		it('should return error if the folder doesn\'t exist', function(done) {
