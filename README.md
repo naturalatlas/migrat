@@ -12,14 +12,15 @@ $ npm install -g migrat
 - Supports global locking during migration runs, to prevent multiple servers attempting to perform global migrations at the same time.
 - Pass context through to each migration. This can be a logging interface, a set of database connections, ... it's up to you.
 - Custom hooks throughout the migration process.
+- Perform dry runs to see the migration plan before it's executed.
 - Plugin-friendly (see below)
 
 ### Plugins
 
 Migrat works great on its own, but it's even better with plugins to reduce boilerplate. Plugin list (the ones without links haven't been developed yet – [pull requests](#contributing) welcome):
 
- - [`migrat-postgres`](https://github.com/naturalatlas/migrat-postgres) – Locks, state storage, and migrations in pure SQL.
- - `migrat-mysql` – Locks, state storage, and migrations in pure SQL.
+ - [`migrat-postgres`](https://github.com/naturalatlas/migrat-postgres) – Locks, state storage, and migration files in pure SQL.
+ - `migrat-mysql` – Locks, state storage, and migration files in pure SQL.
  - `migrat-hipchat` – Send live migration status to a [HipChat](https://www.hipchat.com/) room.
  - `migrat-slack` – Send live migration status to a [Slack](https://slack.com/) channel.
  - `migrat-datadog` – Send migration results to a [Datadog](https://www.datadoghq.com) dashboard.
@@ -35,14 +36,10 @@ $ migrat create add-user-table --all-nodes
 ```
 
 ```sh
-# show which migrations need to be run
-$ migrat status
-
-# get up to date (only forward)
-$ migrat up [filename]
-
-# go back to a specific migration
-$ migrat down <filename>
+$ migrat init  # set up a migrat project in the current directory
+$ migrat up --dry-run  # show which migrations need to be run
+$ migrat up [filename]  # get up to date (only forward)
+$ migrat down <filename>  # go back to a specific migration
 ```
 
 ## Documentation
