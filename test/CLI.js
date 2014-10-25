@@ -6,7 +6,7 @@ var exec = require('child_process').exec;
 var bin = 'node ' + path.resolve(__dirname, '../bin/migrat');
 
 describe('CLI', function() {
-	describe('create command', function() {
+	describe('"create" command', function() {
 		it('should use "migrationTemplate" option if present in config', function(done) {
 			var projectDir = path.resolve(__dirname, './fixtures/custom-create-project');
 			var configFile = projectDir + '/migrat.config.js';
@@ -25,8 +25,26 @@ describe('CLI', function() {
 				done();
 			});
 		});
+		it('should use plugin-defined templates when given the --type argument', function(done) {
+			var projectDir = path.resolve(__dirname, './fixtures/plugin-create-project');
+			var configFile = projectDir + '/migrat.config.js';
+
+			exec(bin + ' create test --type ext -c ' + configFile, {env: {USER: 'testuser'}}, function(err, stdout, stderr) {
+				assert.isNull(err);
+				assert.match(stdout, /\d{13}\-test\.ext/);
+				var filename = stdout.match(/\d{13}\-test\.ext/)[0];
+				var file = __dirname + '/temp/' + filename;
+				var timestamp = filename.match(/\d+/)[0];
+				assert.isTrue(fs.existsSync(file));
+
+				var content_expected = 'hello, testuser';
+				var content_actual = fs.readFileSync(file, 'utf8');
+				assert.equal(content_expected, content_actual);
+				done();
+			});
+		});
 	});
-	describe('up, down commands', function() {
+	describe('"up", "down" commands', function() {
 		it('should call "initialize" first, and "terminate" at end', function(done) {
 			var projectDir = path.resolve(__dirname, './fixtures/initialize-project');
 			var configFile = projectDir + '/migrat.config.js';
