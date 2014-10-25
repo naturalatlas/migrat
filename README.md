@@ -24,6 +24,15 @@ Migrat works great on its own, but it's even better with plugins to reduce boile
  - `migrat-hipchat` – Send live migration status to a [HipChat](https://www.hipchat.com/) room.
  - `migrat-slack` – Send live migration status to a [Slack](https://slack.com/) channel.
  - `migrat-datadog` – Send migration results to a [Datadog](https://www.datadoghq.com) dashboard.
+ - `migrat-php` – Execute PHP migration files.
+
+With plugins, you can have a migration directory that looks like:
+
+```
+./1414275876214-create-schema.psql
+./1414275879591-backfill-avatars.js
+./1414275876214-process-something.php
+```
 
 ### Usage Examples
 
