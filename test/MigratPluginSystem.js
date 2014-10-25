@@ -202,4 +202,58 @@ describe('MigratPluginSystem', function() {
 			assert.equal(plugins.getTemplateRenderer('awf'), renderer);
 		});
 	});
+
+	describe('.executeHook()', function() {
+		it('should still call callback if no hooks registered', function(done) {
+			var plugins = new MigratPluginSystem();
+			plugins.executeHook('testhook', ['hello', function(err) {
+				assert.isNull(err);
+				done();
+			}]);
+		});
+		it('should execute appropriate hooks', function(done) {
+			var executed1 = false;
+			var executed2 = false;
+
+			var plugins = new MigratPluginSystem([
+				function(migrat) {
+					migrat.registerHook('testhook', function(message, callback) {
+						executed1 = true;
+						assert.equal(message, 'hello');
+						callback();
+					});
+					migrat.registerHook('testhook', function(message, callback) {
+						executed2 = true;
+						assert.equal(message, 'hello');
+						callback();
+					});
+				}
+			]);
+			plugins.executeHook('testhook', ['hello', function(err) {
+				assert.isNull(err);
+				assert.isTrue(executed1);
+				assert.isTrue(executed2);
+				done();
+			}]);
+		});
+		it('should return error if a hook returns an error', function(done) {
+			var executed1 = false;
+			var executed2 = false;
+
+			var renderer = function() {};
+			var plugins = new MigratPluginSystem([
+				function(migrat) {
+					migrat.registerHook('initialize', function(callback) { executed1 = true; callback(); });
+					migrat.registerHook('initialize', function(callback) { executed2 = true; callback(new Error('Some error')); });
+				}
+			]);
+			plugins.executeHook('initialize', [function(err) {
+				assert.isTrue(executed1);
+				assert.isTrue(executed2);
+				assert.instanceOf(err, Error);
+				assert.match(err.message, /Some error/);
+				done();
+			}]);
+		});
+	});
 });

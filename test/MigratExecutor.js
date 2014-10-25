@@ -4,9 +4,11 @@ var MigratProject = require('../lib/MigratProject.js');
 var MigratExecutor = require('../lib/MigratExecutor.js');
 var MigratRunList = require('../lib/MigratRunList.js');
 var MigratMigration = require('../lib/MigratMigration.js');
+var MigratPluginSystem = require('../lib/MigratPluginSystem.js');
 var MockMigration = require('./mocks/MockMigration.js');
 var options = {silent: true};
 var writer = function(item, callback) { callback(); };
+var plugins = new MigratPluginSystem();
 
 describe('MigratExecutor', function() {
 	it('should not error if any of the hooks are not defined', function(done) {
@@ -16,8 +18,8 @@ describe('MigratExecutor', function() {
 		var migration = MockMigration('/1414050095205-mockfile.js');
 		runlist.push('up', migration);
 
-		MigratExecutor(project, runlist, options, writer, function(err) {
-			assert.isUndefined(err);
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
+			assert.isNull(err);
 			done();
 		});
 	});
@@ -40,7 +42,7 @@ describe('MigratExecutor', function() {
 			callback();
 		}
 
-		MigratExecutor(project, runlist, options, writer, function(err) { });
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) { });
 	});
 	it('should not execute any migrations marked as "skip"', function(done) {
 		var executedHook = false;
@@ -52,8 +54,8 @@ describe('MigratExecutor', function() {
 		migration.methods.check = function(context, callback) { throw new Error('Migration "check" executed'); };
 		runlist.push('skip', migration);
 
-		MigratExecutor(project, runlist, options, writer, function(err) {
-			assert.isUndefined(err);
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
+			assert.isNull(err);
 			done();
 		});
 	});
@@ -68,8 +70,8 @@ describe('MigratExecutor', function() {
 		migration.methods.check = function(context, callback) { executedCheck = true; callback(); };
 		runlist.push('up', migration);
 
-		MigratExecutor(project, runlist, options, writer, function(err) {
-			assert.isUndefined(err);
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
+			assert.isNull(err);
 			assert.isTrue(executedUp, 'Executed "up"');
 			assert.isTrue(executedCheck, 'Executed "check"');
 			done();
@@ -85,8 +87,8 @@ describe('MigratExecutor', function() {
 		migration.methods.up = function(context, callback) { throw new Error('Migration "up" executed'); };
 		runlist.push('down', migration);
 
-		MigratExecutor(project, runlist, options, writer, function(err) {
-			assert.isUndefined(err);
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
+			assert.isNull(err);
 			assert.isTrue(executedDown, 'Executed "down"');
 			done();
 		});
@@ -104,7 +106,7 @@ describe('MigratExecutor', function() {
 		runlist.push('up', migration1);
 		runlist.push('up', migration2);
 
-		MigratExecutor(project, runlist, options, writer, function(err) {
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
 			assert.instanceOf(err, Error);
 			assert.equal(err.message, 'Migration1 up failed');
 			done();
@@ -124,7 +126,7 @@ describe('MigratExecutor', function() {
 		runlist.push('up', migration1);
 		runlist.push('up', migration2);
 
-		MigratExecutor(project, runlist, options, writer, function(err) {
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
 			assert.instanceOf(err, Error);
 			assert.equal(err.message, 'Migration1 check failed');
 			done();
@@ -158,7 +160,7 @@ describe('MigratExecutor', function() {
 		runlist.push('up', migration);
 		runlist.push('up', migration2);
 
-		MigratExecutor(project, runlist, options, writer, function(err) {
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
 			assert.equal(contextExecutions, 1);
 			done();
 		});
@@ -182,9 +184,37 @@ describe('MigratExecutor', function() {
 		};
 		runlist.push('up', migration);
 
-		MigratExecutor(project, runlist, options, writer, function(err) {
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
 			assert.isTrue(executedUp);
-			assert.isUndefined(err);
+			assert.isNull(err);
+			done();
+		});
+	});
+	it('should call "beforeRun" plugin hook', function(done) {
+		var executedUp = false;
+		var executedHook = false;
+		var project = new MigratProject({});
+		var plugins = new MigratPluginSystem([
+			function(migrat) {
+				migrat.registerHook('beforeRun', function(_runlist, callback) {
+					executedHook = true;
+					assert.equal(_runlist, runlist);
+					callback();
+				});
+			}
+		]);
+		var runlist = new MigratRunList();
+		var migration = MockMigration('/1414050095205-mockfile.js');
+		migration.methods.up = function(context, callback) {
+			assert.isTrue(executedHook);
+			executedUp = true;
+			callback();
+		};
+		runlist.push('up', migration);
+
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
+			assert.isTrue(executedUp);
+			assert.isNull(err);
 			done();
 		});
 	});
@@ -209,8 +239,38 @@ describe('MigratExecutor', function() {
 		};
 		runlist.push('up', migration);
 
-		MigratExecutor(project, runlist, options, writer, function(err) {
-			assert.isUndefined(err);
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
+			assert.isNull(err);
+			assert.isTrue(executedUp);
+			done();
+		});
+	});
+	it('should call "beforeEach" plugin hook', function(done) {
+		var executedUp = false;
+		var executedHook = false;
+
+		var project = new MigratProject({});
+		var plugins = new MigratPluginSystem([
+			function(migrat) {
+				migrat.registerHook('beforeEach', function(item, callback) {
+					assert.equal(item.method, 'up');
+					assert.equal(item.migration, migration);
+					executedHook = true;
+					callback();
+				});
+			}
+		]);
+		var runlist = new MigratRunList();
+		var migration = MockMigration('/1414050095205-mockfile.js');
+		migration.methods.up = function(context, callback) {
+			assert.isTrue(executedHook);
+			executedUp = true;
+			callback();
+		};
+		runlist.push('up', migration);
+
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
+			assert.isNull(err);
 			assert.isTrue(executedUp);
 			done();
 		});
@@ -238,8 +298,40 @@ describe('MigratExecutor', function() {
 		};
 		runlist.push('up', migration);
 
-		MigratExecutor(project, runlist, options, writer, function(err) {
-			assert.isUndefined(err);
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
+			assert.isNull(err);
+			assert.isTrue(executedHook);
+			done();
+		});
+	});
+	it('should call "afterEach" plugin hook', function(done) {
+		var executedUp = false;
+		var executedHook = false;
+
+		var project = new MigratProject();
+		var plugins = new MigratPluginSystem([
+			function(migrat) {
+				migrat.registerHook('afterEach', function(err, item, callback) {
+					assert.isNull(err);
+					assert.equal(item.method, 'up');
+					assert.equal(item.migration, migration);
+					assert.isTrue(executedUp);
+					executedHook = true;
+					callback();
+				});
+			}
+		]);
+		var runlist = new MigratRunList();
+		var migration = MockMigration('/1414050095205-mockfile.js');
+		migration.methods.up = function(context, callback) {
+			assert.isFalse(executedHook);
+			executedUp = true;
+			callback();
+		};
+		runlist.push('up', migration);
+
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
+			assert.isNull(err);
 			assert.isTrue(executedHook);
 			done();
 		});
@@ -255,9 +347,29 @@ describe('MigratExecutor', function() {
 			}
 		});
 		var runlist = new MigratRunList();
-		MigratExecutor(project, runlist, options, writer, function(err) {
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
 			assert.isTrue(executedHook);
-			assert.isUndefined(err);
+			assert.isNull(err);
+			done();
+		});
+	});
+	it('should call "afterRun" plugin hook', function(done) {
+		var executedHook = false;
+		var project = new MigratProject({});
+		var plugins = new MigratPluginSystem([
+			function(migrat) {
+				migrat.registerHook('afterRun', function(err, _runlist, callback) {
+					assert.isNull(err);
+					executedHook = true;
+					assert.equal(_runlist, runlist);
+					callback();
+				});
+			}
+		]);
+		var runlist = new MigratRunList();
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
+			assert.isTrue(executedHook);
+			assert.isNull(err);
 			done();
 		});
 	});
