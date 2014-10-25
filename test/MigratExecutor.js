@@ -85,10 +85,12 @@ describe('MigratExecutor', function() {
 		var migration = MockMigration('/1414050095205-mockfile.js');
 		migration.methods.down = function(context, callback) { executedDown = true; callback(); };
 		migration.methods.up = function(context, callback) { throw new Error('Migration "up" executed'); };
+		migration.methods.check = function(context, callback) { executedCheck = true; callback(); };
 		runlist.push('down', migration);
 
 		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
 			assert.isNull(err);
+			assert.isFalse(executedCheck, 'Executed "check"');
 			assert.isTrue(executedDown, 'Executed "down"');
 			done();
 		});
