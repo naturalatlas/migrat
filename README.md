@@ -34,6 +34,14 @@ With plugins, you can have a migration directory that looks like:
 ./1414275876214-process-something.php
 ```
 
+### Screenshots
+
+![migrat init](screenshots/init.png)
+
+![migrat create](screenshots/create.png)
+
+![migrat up](screenshots/up.png)
+
 ### Usage Examples
 
 ```sh
