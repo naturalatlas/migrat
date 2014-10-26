@@ -37,9 +37,7 @@ With plugins, you can have a migration directory that looks like:
 ### Screenshots
 
 ![migrat init](screenshots/init.png)
-
 ![migrat create](screenshots/create.png)
-
 ![migrat up](screenshots/up.png)
 
 ### Usage Examples
