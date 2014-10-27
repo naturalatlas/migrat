@@ -4,7 +4,7 @@
   "description": "A pluggable migration runner.",
   "main": "index.js",
   "scripts": {
-    "test": "node ./test/scripts/clean.js && mocha -R list"
+    "test": "node ./test/scripts/clean.js && mocha --check-leaks -R list"
   },
   "bin": {
     "migrat": "./bin/migrat"

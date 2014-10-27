@@ -31,26 +31,25 @@ function displayHelp() {
 	console.log('');
 	console.log('Commands:');
 	console.log('  "' + chalk.bold('init') + '"    Creates a new migrat project in the current directory.');
-	console.log('');
-	console.log('              $ migrat init');
+	console.log('            ' + chalk.gray('$ migrat init'));
 	console.log('');
 	console.log('  "' + chalk.bold('create') + '"  Creates a new migration file.');
-	console.log('');
-	console.log('              $ migrat create <name>');
+	console.log('            ' + chalk.gray('$ migrat create <name>'));
 	console.log('');
 	console.log('  "' + chalk.bold('up') + '"      Executes migrations that haven\'t run yet in a oldest-to-newest order. If no');
 	console.log('            --to argument is given, it will attempt to migrate to the newest migration. If');
 	console.log('            on is provided, it will run up to (and include) the specified migration.');
-	console.log('');
-	console.log('              $ migrat up');
-	console.log('              $ migrat up --dry-run');
-	console.log('              $ migrat up --to <filename>');
+	console.log('            ' + chalk.gray('$ migrat up'));
+	console.log('            ' + chalk.gray('$ migrat up --dry-run'));
+	console.log('            ' + chalk.gray('$ migrat up --to <filename>'));
 	console.log('');
 	console.log('  "' + chalk.bold('down') + '"    Reverts migrations that have run in a newest-to-oldest order. The --to argument');
 	console.log('            required. It will call the "down" method down to (but not including) --to.');
+	console.log('            ' + chalk.gray('$ migrat up --to <filename> --dry-run'));
+	console.log('            ' + chalk.gray('$ migrat up --to <filename>'));
 	console.log('');
-	console.log('              $ migrat up --to <filename> --dry-run');
-	console.log('              $ migrat up --to <filename>');
+	console.log('  "' + chalk.bold('unlock') + '"  Use to release a lock that may not have been released properly, like on program crash.');
+	console.log('            ' + chalk.gray('$ migrat unlock'));
 	console.log('');
 }
 

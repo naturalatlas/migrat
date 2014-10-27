@@ -100,4 +100,22 @@ describe('CLI', function() {
 			});
 		});
 	});
+	describe('"unlock" command', function() {
+		it('should unlock a locked project', function(done) {
+			var lockFile = __dirname + '/temp/unlock-locked.lock';
+			fs.writeFileSync(lockFile, '', 'utf8');
+			assert.isTrue(fs.existsSync(lockFile));
+			var projectDir = __dirname + '/fixtures/unlock-lock-project';
+			var configFile = projectDir + '/migrat.config.js';
+			exec(bin + ' unlock -c ' + configFile, function(err, stdout, stderr) {
+				assert.isNull(err);
+				assert.isFalse(fs.existsSync(lockFile));
+				assert.match(stdout, /called:initialize/);
+				assert.match(stdout, /called:terminate/);
+				assert.match(stdout, /called:plugin_initialize/);
+				assert.match(stdout, /called:plugin_terminate/);
+				done();
+			});
+		});
+	});
 });
