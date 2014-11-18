@@ -20,6 +20,7 @@ $ npm install -g migrat
 Migrat works great on its own, but it's even better with plugins to reduce boilerplate. Plugin list (the ones without links haven't been developed yet – help welcome (see the [plugin API](https://github.com/naturalatlas/migrat/wiki/Plugin-API)):
 
  - [`migrat-postgres`](https://github.com/naturalatlas/migrat-postgres) – Locks, state storage, and migration files in pure SQL.
+ - [`migrat-sh`](https://github.com/naturalatlas/migrat-sh) – Execute shell script migration files.
  - `migrat-mysql` – Locks, state storage, and migration files in pure SQL.
  - `migrat-hipchat` – Send live migration status to a [HipChat](https://www.hipchat.com/) room.
  - `migrat-slack` – Send live migration status to a [Slack](https://slack.com/) channel.
