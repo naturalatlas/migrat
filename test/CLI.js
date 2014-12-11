@@ -3,7 +3,7 @@ var fs = require('fs');
 var path = require('path');
 var assert = require('chai').assert;
 var exec = require('child_process').exec;
-var bin = 'node ' + path.resolve(__dirname, '../bin/migrat');
+var bin = process.execPath + ' ' + path.resolve(__dirname, '../bin/migrat');
 
 describe('CLI', function() {
 	describe('"create" command', function() {
