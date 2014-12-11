@@ -1,4 +1,7 @@
 # Migrat
+[![NPM version](http://img.shields.io/npm/v/migrat.svg?style=flat)](https://www.npmjs.org/package/migrat)
+[![Build Status](http://img.shields.io/travis/naturalatlas/migrat/master.svg?style=flat)](https://travis-ci.org/naturalatlas/migrat)
+[![Coverage Status](http://img.shields.io/coveralls/naturalatlas/migrat/master.svg?style=flat)](https://coveralls.io/r/naturalatlas/migrat)
 
 *Migrat is a pluggable Node.js migration tool designed for diverse stacks and processes.* It is not tied any particular database engine and supports multi-node environments by differentiating migrations that should run on one node (to update a global database, for instance) and migrations that should run on all nodes (like updating a per-node cache).
 
