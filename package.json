@@ -4,7 +4,8 @@
   "description": "A pluggable migration runner.",
   "main": "index.js",
   "scripts": {
-    "test": "node ./test/scripts/clean.js && mocha --check-leaks -R list"
+    "clean": "node ./test/scripts/clean.js",
+    "test": "npm run clean && mocha --check-leaks -R list"
   },
   "bin": {
     "migrat": "./bin/migrat"
@@ -17,6 +18,10 @@
     "database",
     "runner"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/naturalatlas/migrat.git"
+  },
   "author": "Brian Reavis <brian@thirdroute.com>",
   "license": "Apache License, v2.0",
   "dependencies": {
