@@ -1,6 +1,6 @@
 {
   "name": "migrat",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A pluggable migration runner.",
   "main": "index.js",
   "scripts": {
