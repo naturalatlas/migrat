@@ -123,7 +123,7 @@ module.exports = {
     //   * "timestamp" The Date object used to put the timestamp
     //                 at the beginning of the migration filename.
     migrationTemplate: function(details, callback) {
-        fs.readFileSync('path/to/template.js', 'utf8', callback);
+        fs.readFile('path/to/template.js', 'utf8', callback);
     },
 
     // OPTIONAL. Invoked at the beginning of a migration
