@@ -20,7 +20,7 @@ $ npm install -g migrat
 
 ### Plugins
 
-Migrat works great on its own, but it's even better with plugins to reduce boilerplate. Plugin list (the ones without links haven't been developed yet – help welcome (see the [plugin API](https://github.com/naturalatlas/migrat/wiki/Plugin-API)):
+Migrat works great on its own, but it's even better with plugins to reduce boilerplate. Plugin list (the ones without links haven't been developed yet – help welcome (see the ["Writing Plugins"](https://github.com/naturalatlas/migrat/wiki/Writing-Plugins) guide):
 
  - [`migrat-postgres`](https://github.com/naturalatlas/migrat-postgres) – Locks, state storage, and migration files in pure SQL.
  - [`migrat-sh`](https://github.com/naturalatlas/migrat-sh) – Execute shell script migration files.
@@ -168,7 +168,7 @@ module.exports = {
         callback();
     },
 
-    // OPTIONAL. Callback executed right before all
+    // OPTIONAL. Callback executed right after all
     // queued migrations are executed.
     afterRun: function(err, runlist, callback) {
         callback();
