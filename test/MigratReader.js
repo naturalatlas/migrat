@@ -157,7 +157,7 @@ describe('MigratReader', function() {
 				assert.isNull(err);
 				assert.isArray(migrations);
 
-				var filenames = _.pluck(migrations, 'filename');
+				var filenames = _.map(migrations, 'filename');
 				assert.include(filenames, '1414006573623-first.js');
 				assert.include(filenames, '1414006573678-second.js');
 				assert.include(filenames, '1414006573679-third.all.js');
