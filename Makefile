@@ -1,8 +1,12 @@
-.PHONY: test test-ci-coverage release
+.PHONY: test test-ci-coverage release clean
 
 _MOCHA=node_modules/.bin/_mocha
 ISTANBUL=node_modules/.bin/istanbul
 COVERALLS=node_modules/.bin/coveralls
+
+clean:
+	rm -rf ./test/temp
+	mkdir ./test/temp
 
 test:
 	npm test
@@ -11,7 +15,7 @@ test-ci-coverage:
 	npm install coveralls
 	npm install istanbul
 	@rm -rf coverage
-	npm run clean
+	@make clean
 	$(ISTANBUL) cover $(_MOCHA) --report lcovonly -- -R tap
 
 	@echo

@@ -1,4 +1,3 @@
-var _ = require('lodash');
 var assert = require('chai').assert;
 var MigratReader = require('../lib/MigratReader.js');
 var MigratMigration = require('../lib/MigratMigration.js');
@@ -157,7 +156,7 @@ describe('MigratReader', function() {
 				assert.isNull(err);
 				assert.isArray(migrations);
 
-				var filenames = _.pluck(migrations, 'filename');
+				var filenames = migrations.map(v => v.filename);
 				assert.include(filenames, '1414006573623-first.js');
 				assert.include(filenames, '1414006573678-second.js');
 				assert.include(filenames, '1414006573679-third.all.js');
