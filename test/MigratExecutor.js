@@ -77,6 +77,42 @@ describe('MigratExecutor', function() {
 			done();
 		});
 	});
+	it('should execute any migrations marked as "up" (promise)', function(done) {
+		var executedUp = false;
+		var executedCheck = false;
+		var project = new MigratProject({});
+		var runlist = new MigratRunList();
+		var migration = MockMigration('/1414050095205-mockfile.js');
+		migration.methods.up = function(context) { executedUp = true; return Promise.resolve(); };
+		migration.methods.down = function(context, callback) { throw new Error('Migration "down" executed'); };
+		migration.methods.check = function(context) { executedCheck = true; return Promise.resolve(); };
+		runlist.push('up', migration);
+
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
+			assert.isNull(err);
+			assert.isTrue(executedUp, 'Executed "up"');
+			assert.isTrue(executedCheck, 'Executed "check"');
+			done();
+		});
+	});
+	it('should execute any migrations marked as "up" (non-callback)', function(done) {
+		var executedUp = false;
+		var executedCheck = false;
+		var project = new MigratProject({});
+		var runlist = new MigratRunList();
+		var migration = MockMigration('/1414050095205-mockfile.js');
+		migration.methods.up = function(context) { executedUp = true; return; };
+		migration.methods.down = function(context, callback) { throw new Error('Migration "down" executed'); };
+		migration.methods.check = function(context) { executedCheck = true; };
+		runlist.push('up', migration);
+
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
+			assert.isNull(err);
+			assert.isTrue(executedUp, 'Executed "up"');
+			assert.isTrue(executedCheck, 'Executed "check"');
+			done();
+		});
+	});
 	it('should execute any migrations marked as "down"', function(done) {
 		var executedDown = false;
 		var executedCheck = false;
@@ -86,6 +122,42 @@ describe('MigratExecutor', function() {
 		migration.methods.down = function(context, callback) { executedDown = true; callback(); };
 		migration.methods.up = function(context, callback) { throw new Error('Migration "up" executed'); };
 		migration.methods.check = function(context, callback) { executedCheck = true; callback(); };
+		runlist.push('down', migration);
+
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
+			assert.isNull(err);
+			assert.isFalse(executedCheck, 'Executed "check"');
+			assert.isTrue(executedDown, 'Executed "down"');
+			done();
+		});
+	});
+	it('should execute any migrations marked as "down" (promise)', function(done) {
+		var executedDown = false;
+		var executedCheck = false;
+		var project = new MigratProject({});
+		var runlist = new MigratRunList();
+		var migration = MockMigration('/1414050095205-mockfile.js');
+		migration.methods.down = function(context) { executedDown = true; return Promise.resolve(); };
+		migration.methods.up = function(context, callback) { throw new Error('Migration "up" executed'); };
+		migration.methods.check = function(context) { executedCheck = true; return Promise.resolve(); };
+		runlist.push('down', migration);
+
+		MigratExecutor(project, plugins, runlist, options, writer, function(err) {
+			assert.isNull(err);
+			assert.isFalse(executedCheck, 'Executed "check"');
+			assert.isTrue(executedDown, 'Executed "down"');
+			done();
+		});
+	});
+	it('should execute any migrations marked as "down" (non-callback)', function(done) {
+		var executedDown = false;
+		var executedCheck = false;
+		var project = new MigratProject({});
+		var runlist = new MigratRunList();
+		var migration = MockMigration('/1414050095205-mockfile.js');
+		migration.methods.down = function(context) { executedDown = true; return; };
+		migration.methods.up = function(context, callback) { throw new Error('Migration "up" executed'); };
+		migration.methods.check = function(context) { executedCheck = true; };
 		runlist.push('down', migration);
 
 		MigratExecutor(project, plugins, runlist, options, writer, function(err) {

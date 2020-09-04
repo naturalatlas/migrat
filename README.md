@@ -78,6 +78,19 @@ module.exports.down = function(context, callback) { /* ... */ };
 module.exports.check = function(context, callback) { /* ... */ };
 ```
 
+You can also use async methods:
+
+```js
+// (required) apply the change
+module.exports.up = async function(context) { /* ... */ };
+
+// (required) revert the change
+module.exports.down = async function(context) { /* ... */ };
+
+// (optional) verify the change took place
+module.exports.check = async function(context) { /* ... */ };
+```
+
 ### Project Configuration
 
 Migrat will look for for a `migrat.config.js` in your project directory, unless overriden by `--config`:
